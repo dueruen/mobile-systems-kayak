@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import MapView from "react-native-maps";
-import isLocationOnWater from  "../../scripts/onWater.js"
+import isLocationOnWater from  "../../api/onWater.js"
 
 import Navbar from "../navbar/Navbar";
 

@@ -1,4 +1,4 @@
-const token = '<YOUR ONWATER TOKEN>'
+const token = 'e--cx8gNnyU364Z1QCZC'
 let URL = 'https://api.onwater.io/api/v1/results/'
 
 /**
