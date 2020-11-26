@@ -1,4 +1,4 @@
-const token = 'e--cx8gNnyU364Z1QCZC'
+const token = '<INSERT API KEY>'
 let URL = 'https://api.onwater.io/api/v1/results/'
 
 /**
@@ -8,7 +8,7 @@ let URL = 'https://api.onwater.io/api/v1/results/'
  * @param {String} latitude 
  */
 async function isLocationOnWater(longitude, latitude) {
-   let queryURL = URL + latitude + "," + longitude + `?access_token=${token}` //Not the most beautiful way of handling the query string
+   let queryURL = `${URL}${latitude},${longitude}?access_token=${token}`
 
     try {
         let response = await fetch(
