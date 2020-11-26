@@ -1,8 +1,10 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import MapView from "react-native-maps";
+import isLocationOnWater from  "../../scripts/onWater.js"
 
 import Navbar from "../navbar/Navbar";
+
 
 const MapScreen = () => {
   return (
@@ -16,12 +18,19 @@ const MapScreen = () => {
           longitudeDelta: 0.0121,
         }}
         customMapStyle={generatedMapStyle}
+        onPress={onPressHandler}
       />
       <Navbar />
     </View>
   );
 };
-
+ 
+/*When we start working with user data, this should probably be remade into 
+a onUserLocationChangedHandler instead */
+const onPressHandler = async (e) => {
+  let onWater = await isLocationOnWater(e.nativeEvent.coordinate.longitude,e.nativeEvent.coordinate.latitude)
+  console.log(onWater)
+}
 const styles = StyleSheet.create({
   page: {
     flex: 1,
