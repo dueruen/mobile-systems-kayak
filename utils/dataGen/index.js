@@ -25,7 +25,7 @@ const dataPublichInterval = 200;
 
 let dataStreamRunning = false;
 
-const rawData = require('./one.json');
+const rawData = require('./data/one.json');
 let dataObjects;
 let count = 0;
 
