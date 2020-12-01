@@ -1,12 +1,56 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import MapView from "react-native-maps";
-import isLocationOnWater from  "../../api/onWater.js"
-
+import isLocationOnWater from "../../api/onWater.js";
+import MapView, { Polyline, Marker } from "react-native-maps";
 import Navbar from "../navbar/Navbar";
 
+/**
+ * When we start working with user data, this should probably be remade into
+ * a onUserLocationChangedHandler instead
+ */
+const onPressHandler = async (e) => {
+  let onWater = await isLocationOnWater(
+    e.nativeEvent.coordinate.longitude,
+    e.nativeEvent.coordinate.latitude
+  );
+  console.log(onWater);
+};
 
 const MapScreen = () => {
+  const [coordinates, setCoordinates] = useState([]);
+  const [pathToAnimate, setPathToAnimate] = useState([
+    { latitude: 55.408188, longitude: 10.38392 },
+    { latitude: 55.408188, longitude: 10.38492 },
+    { latitude: 55.408388, longitude: 10.38592 },
+    { latitude: 55.408488, longitude: 10.38622 },
+    { latitude: 55.408489, longitude: 10.38735 },
+    { latitude: 55.409489, longitude: 10.38935 },
+    { latitude: 55.409429, longitude: 10.38993 },
+    { latitude: 55.409423, longitude: 10.39113 },
+    { latitude: 55.409223, longitude: 10.39113 },
+    { latitude: 55.408023, longitude: 10.39113 },
+    { latitude: 55.407013, longitude: 10.39013 },
+    { latitude: 55.407013, longitude: 10.38513 },
+    { latitude: 55.406813, longitude: 10.38313 },
+  ]);
+
+  /**
+   * useEffect() is ran when componentDidMount and the callback invoke clearInterval()
+   */
+  useEffect(() => {
+    const interval = setInterval(animatePath, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  /**
+   * Animate path using shift() to remove element and add to coordinate state
+   */
+  const animatePath = () => {
+    if (pathToAnimate.length > 0) {
+      setCoordinates((oldArray) => [...oldArray, pathToAnimate.shift()]);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -19,18 +63,21 @@ const MapScreen = () => {
         }}
         customMapStyle={generatedMapStyle}
         onPress={onPressHandler}
-      />
+      >
+        {coordinates.length > 0 && (
+          <Marker key={1} coordinate={coordinates[0]} title="Start position" />
+        )}
+        <Polyline
+          coordinates={coordinates}
+          strokeColor="#5f6af8"
+          strokeWidth={4}
+        />
+      </MapView>
       <Navbar />
     </View>
   );
 };
- 
-/*When we start working with user data, this should probably be remade into 
-a onUserLocationChangedHandler instead */
-const onPressHandler = async (e) => {
-  let onWater = await isLocationOnWater(e.nativeEvent.coordinate.longitude,e.nativeEvent.coordinate.latitude)
-  console.log(onWater)
-}
+
 const styles = StyleSheet.create({
   page: {
     flex: 1,
