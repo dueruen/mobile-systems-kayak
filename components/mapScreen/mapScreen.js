@@ -5,9 +5,11 @@ import MapView, { Polyline, Marker } from "react-native-maps";
 import Navbar from "../navbar/Navbar";
 import PubSub from "pubsub-js";
 import { RunDataStream, DataStream, inspvas } from "../../utils/dataGen/index";
+import {StarLocationDataSampling, LocationData} from '../../utils/sensorSampler/index'
 
 //Token from subscription so we're able to unsubscribe.
 let token;
+let locationToken
 
 /**
  * When we start working with user data, this should probably be remade into
@@ -35,12 +37,14 @@ const AnimatedPolyline = () => {
     return () => {
       //NOT USED ATM - clearInterval(interval);
       PubSub.unsubscribe(token);
+      PubSub.unsubscribe(locationToken);
     };
   }, []);
 
   const streamData = () => {
     //Start the dataStream
     PubSub.publish(RunDataStream, true);
+    PubSub.publish(StarLocationDataSampling, true);
 
     //Subscribe to the data stream
     token = PubSub.subscribe(DataStream, (msg, data) => {
@@ -52,6 +56,10 @@ const AnimatedPolyline = () => {
 
         setCoordinates((oldArray) => [...oldArray, coordinate]);
       }
+    });
+
+    locationToken = PubSub.subscribe(LocationData, (msg, data) => {
+      console.log(data)
     });
   };
 

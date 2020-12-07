@@ -9,12 +9,17 @@ import CurrentScreen from "./components/currentScreen/CurrentScreen";
 import MapScreen from "./components/mapScreen/mapScreen";
 import { AppLoading } from "expo";
 
+import {requestAndroidLocationPermission} from './utils/permissionHandler/index'
+
 const Stack = createStackNavigator();
+
 
 export default function App() {
   let [fontsLoaded] = useFonts({
     Quicksand_500Medium,
   });
+
+  requestAndroidLocationPermission();
 
   if (!fontsLoaded) {
     return <AppLoading />;
