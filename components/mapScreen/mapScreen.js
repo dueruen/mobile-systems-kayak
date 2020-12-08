@@ -73,7 +73,7 @@ const AnimatedPolyline = () => {
           key={1}
           coordinate={coordinates[coordinates.length - 1]}
           title="Start position"
-          anchor={{ x: 0.5, y: 0.5 }}
+          anchor={{ x: 0.3, y: 0.31 }}
           opacity={0.8}
         >
           <Animatable.Image
@@ -81,7 +81,7 @@ const AnimatedPolyline = () => {
             easing="ease-out"
             iterationCount="infinite"
             source={require("../../assets/img/circle.png")}
-            style={{ height: 30, width: 30 }}
+            style={{ height: 18, width: 18 }}
           ></Animatable.Image>
         </Marker>
       )}
