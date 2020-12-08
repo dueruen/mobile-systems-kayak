@@ -11,19 +11,23 @@ import MapView, { Polyline, Marker } from "react-native-maps";
 import Navbar from "../navbar/Navbar";
 import PubSub from "pubsub-js";
 import { RunDataStream, DataStream, inspvas } from "../../utils/dataGen/index";
-import { useFonts, Quicksand_500Medium } from "@expo-google-fonts/quicksand";
+import {
+  useFonts,
+  Quicksand_500Medium,
+  Quicksand_700Bold,
+} from "@expo-google-fonts/quicksand";
 import { AppLoading } from "expo";
 //import {StartLocationDataSampling, LocationData} from '../../utils/sensorSampler/index'
 import * as Animatable from "react-native-animatable";
+import { calculateSpeedFromVelocityData } from "../../utils/speedCalc/index";
 
 //Token from subscription so we're able to unsubscribe.
 let token;
-//let locationToken;
+
 //Used to place tracking notice
 const window = Dimensions.get("window");
 
 const AnimatedPolyline = (props) => {
-  
   const [coordinates, setCoordinates] = useState([]);
   /**
    * useEffect() is ran when componentDidMount and the callback invoke clearInterval()
@@ -35,14 +39,14 @@ const AnimatedPolyline = (props) => {
     return () => {
       //NOT USED ATM - clearInterval(interval);
       PubSub.unsubscribe(token);
-//      PubSub.unsubscribe(locationToken);
+      //      PubSub.unsubscribe(locationToken);
     };
   }, []);
 
   const streamData = () => {
     //Start the dataStream
     PubSub.publish(RunDataStream, true);
-//    PubSub.publish(StartLocationDataSampling, true);
+    //    PubSub.publish(StartLocationDataSampling, true);
 
     //Subscribe to the data stream
     token = PubSub.subscribe(DataStream, (msg, data) => {
@@ -51,11 +55,12 @@ const AnimatedPolyline = (props) => {
           latitude: parseFloat(data.latitude),
           longitude: parseFloat(data.longitude),
         };
+
         props.setCoordinate(coordinate);
         setCoordinates((oldArray) => [...oldArray, coordinate]);
       }
     });
-  }
+  };
 
   return (
     <>
@@ -64,7 +69,7 @@ const AnimatedPolyline = (props) => {
           key={1}
           coordinate={coordinates[coordinates.length - 1]}
           title="Start position"
-          anchor={{ x: 0.3, y: 0.31 }}
+          anchor={{ x: 0.45, y: 0.5 }}
           opacity={0.8}
         >
           <Animatable.Image
@@ -88,11 +93,43 @@ const AnimatedPolyline = (props) => {
 const MapScreen = () => {
   const [coordinate, setCoordinate] = useState({});
   const [isTracking, setIsTracking] = useState(false);
+  const [inWater, setInWater] = useState(false);
+  const [currentSpeed, setCurrentSpeed] = useState(0);
+
+  useEffect(() => {
+    //Check every 3 second
+    const interval = setInterval(takeSnapshotWater, 3000);
+    //Start streaming when componentIsMounted
+    streamData();
+    return () => {
+      clearInterval(interval);
+      PubSub.unsubscribe(token);
+    };
+  }, []);
+
+  const streamData = () => {
+    //Start the dataStream
+    PubSub.publish(RunDataStream, true);
+
+    //Subscribe to the data stream
+    token = PubSub.subscribe(DataStream, (msg, data) => {
+      if (data.message === inspvas) {
+        let speed = calculateSpeedFromVelocityData(
+          parseFloat(data.north_velocity),
+          parseFloat(data.east_velocity),
+          parseFloat(data.up_velocity)
+        );
+
+        setCurrentSpeed(speed);
+      }
+    });
+  };
 
   const mapRef = React.useRef(null);
-  
+
   let [fontsLoaded] = useFonts({
     Quicksand_500Medium,
+    Quicksand_700Bold,
   });
 
   if (!fontsLoaded) {
@@ -107,45 +144,83 @@ const MapScreen = () => {
   /**
    * When we start working with user data, this should probably be remade into
    * a onUserLocationChangedHandler instead
-  */
+   */
   const onPressHandler = async (e) => {
-    takeSnapshotWater()
+    takeSnapshotWater();
   };
 
   function takeSnapshotWater() {
-    mapRef.current.takeSnapshot({
+    mapRef.current
+      .takeSnapshot({
         width: 31, // optional, when omitted the view-width is used
         height: 31, // optional, when omitted the view-height is used
-        format: 'png', // image formats: 'png', 'jpg' (default: 'png')
-        result: 'base64'
-    })
-    .then((base64) => {
-      isLocationOnWater(base64).then((res) => {
-        console.log("IS ON WATER:: " + res)
+        format: "png", // image formats: 'png', 'jpg' (default: 'png')
+        result: "base64",
       })
-    })
-    .catch((err) => {
-        throw new Error(err)
-    })
+      .then((base64) => {
+        isLocationOnWater(base64).then((res) => {
+          setInWater(res);
+        });
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
   }
 
   return (
     <View style={styles.container}>
       <MapView
-      style={styles.map}
-      region={{
-        latitude: coordinate.latitude ?? 40.204046791327,
-        longitude: coordinate.longitude ?? -88.38675184236,
-        latitudeDelta: 0.001,
-        longitudeDelta: 0.001,
-      }}
-      ref={mapRef}
-      customMapStyle={generatedMapStyle}
-      onPress={onPressHandler}
-    >
-      {isTracking && <AnimatedPolyline setCoordinate={setCoordinate}/>}
-    </MapView>
-            <TouchableOpacity
+        style={styles.map}
+        region={{
+          latitude: coordinate.latitude ?? 40.204046791327,
+          longitude: coordinate.longitude ?? -88.38675184236,
+          latitudeDelta: 0.001,
+          longitudeDelta: 0.001,
+        }}
+        ref={mapRef}
+        customMapStyle={generatedMapStyle}
+        onPress={onPressHandler}
+      >
+        {isTracking && <AnimatedPolyline setCoordinate={setCoordinate} />}
+      </MapView>
+      <View
+        style={{
+          position: "absolute",
+          top: 50,
+          flexDirection: "row",
+          justifyContent: "center",
+          alignSelf: "center",
+        }}
+      >
+        <View
+          style={{
+            width: "90%",
+            borderRadius: 15,
+            height: 130,
+            backgroundColor: "white",
+            alignItems: "flex-start",
+            paddingLeft: 40,
+            paddingTop: 10,
+            flexDirection: "row",
+          }}
+        >
+          <View>
+            <Text style={{ fontFamily: "Quicksand_700Bold" }}>
+              Current speed
+            </Text>
+            <Text>{isTracking ? (currentSpeed * 3.6).toFixed(2) : 0} km/t</Text>
+          </View>
+          <View style={{ paddingLeft: 40 }}>
+            <Text style={{ fontFamily: "Quicksand_700Bold" }}>
+              Current position
+            </Text>
+            <Text style={{ fontSize: 15 }}>
+              {inWater ? "In water" : "Not in water"}
+            </Text>
+          </View>
+        </View>
+      </View>
+      <TouchableOpacity
         style={{
           padding: 15,
           borderRadius: 30,
@@ -153,11 +228,11 @@ const MapScreen = () => {
           backgroundColor: isTracking
             ? "rgba(60, 179, 113, 0.8)"
             : "rgba(95, 106, 248, 0.8)",
-          top: height / 8,
-          left: "30%",
+          top: height / 6,
+          alignSelf: "center",
           justifyContent: "center",
           alignItems: "center",
-          width: window.height / 4 - 5,
+          width: "70%",
         }}
         onPress={toggle}
       >
@@ -178,6 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5FCFF",
   },
   container: {
+    flex: 1,
     height: "100%",
     width: "100%",
     backgroundColor: "white",
