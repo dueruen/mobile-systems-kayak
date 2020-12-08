@@ -3,21 +3,21 @@ import { StyleSheet, View } from "react-native";
 import { Icon } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 
-const Navbar = () => {
+const Navbar = (props) => {
   const navigation = useNavigation();
 
-  const [currentRoute, setRoute] = useState("Current");
+  const iconColor = props.color;
+  const currentView = props.view;
 
   return (
     <View style={styles.container}>
       <View style={styles.navbarLink}>
         <Icon
           name="map"
-          solid={currentRoute === "Current" ? true : false}
-          color={currentRoute === "Current" ? "#5f6af8" : "#aaaaaa"}
+          solid={currentView === "current" ? true : false}
+          color={currentView === "current" ? "#5f6af8" : "#aaaaaa"}
           type="font-awesome-5"
           onPress={(e) => {
-            setRoute("Current");
             navigation.navigate("Current");
           }}
         />
@@ -31,7 +31,6 @@ const Navbar = () => {
           color="#5f6af8"
           type="font-awesome-5"
           onPress={() => {
-            setRoute("Map");
             navigation.navigate("Map");
           }}
         />
@@ -39,11 +38,10 @@ const Navbar = () => {
       <View style={styles.navbarLink}>
         <Icon
           name="signal"
-          solid={currentRoute === "Data" ? true : false}
-          color={currentRoute === "Data" ? "#5f6af8" : "#aaaaaa"}
+          solid={currentView === "data" ? true : false}
+          color={currentView === "data" ? "#5f6af8" : "#aaaaaa"}
           type="font-awesome-5"
           onPress={() => {
-            setRoute("Data");
             navigation.navigate("Data");
           }}
         />
