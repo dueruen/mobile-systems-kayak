@@ -21,7 +21,7 @@ export const inspvas = "inspvas";
 export const inscovs = "inscovs";
 export const bestutm = "bestutm";
 
-const dataPublishInterval = 200;
+const dataPublishInterval = 2;
 
 let dataStreamRunning = false;
 

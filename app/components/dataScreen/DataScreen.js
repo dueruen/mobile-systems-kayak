@@ -26,6 +26,7 @@ const DataScreen = () => {
       >
         Logdata
       </Text>
+
       <View style={styles.graphContainer}>
         <AnimatedCircularProgress
           size={96}

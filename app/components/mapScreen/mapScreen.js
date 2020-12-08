@@ -13,7 +13,6 @@ import PubSub from "pubsub-js";
 import { RunDataStream, DataStream, inspvas } from "../../utils/dataGen/index";
 import { useFonts, Quicksand_500Medium } from "@expo-google-fonts/quicksand";
 import { AppLoading } from "expo";
-import { set } from "react-native-reanimated";
 //import {StartLocationDataSampling, LocationData} from '../../utils/sensorSampler/index'
 import * as Animatable from "react-native-animatable";
 
@@ -23,22 +22,9 @@ let token;
 //Used to place tracking notice
 const window = Dimensions.get("window");
 
-/**
- * When we start working with user data, this should probably be remade into
- * a onUserLocationChangedHandler instead
- */
-const onPressHandler = async (e) => {
-  let onWater = await isLocationOnWater(
-    e.nativeEvent.coordinate.longitude,
-    e.nativeEvent.coordinate.latitude
-  );
-  console.log(onWater);
-};
-
-const AnimatedPolyline = () => {
+const AnimatedPolyline = (props) => {
+  
   const [coordinates, setCoordinates] = useState([]);
-  const [pathToAnimate, setPathToAnimate] = useState([]);
-
   /**
    * useEffect() is ran when componentDidMount and the callback invoke clearInterval()
    */
@@ -65,15 +51,11 @@ const AnimatedPolyline = () => {
           latitude: parseFloat(data.latitude),
           longitude: parseFloat(data.longitude),
         };
-
+        props.setCoordinate(coordinate);
         setCoordinates((oldArray) => [...oldArray, coordinate]);
       }
     });
-
-//    locationToken = PubSub.subscribe(LocationData, (msg, data) => {
-//      console.log(data)
-//    });
-  };
+  }
 
   return (
     <>
@@ -104,7 +86,11 @@ const AnimatedPolyline = () => {
 };
 
 const MapScreen = () => {
+  const [coordinate, setCoordinate] = useState({});
   const [isTracking, setIsTracking] = useState(false);
+
+  const mapRef = React.useRef(null);
+  
   let [fontsLoaded] = useFonts({
     Quicksand_500Medium,
   });
@@ -118,22 +104,48 @@ const MapScreen = () => {
     setIsTracking(!isTracking);
   }
 
+  /**
+   * When we start working with user data, this should probably be remade into
+   * a onUserLocationChangedHandler instead
+  */
+  const onPressHandler = async (e) => {
+    takeSnapshotWater()
+  };
+
+  function takeSnapshotWater() {
+    mapRef.current.takeSnapshot({
+        width: 31, // optional, when omitted the view-width is used
+        height: 31, // optional, when omitted the view-height is used
+        format: 'png', // image formats: 'png', 'jpg' (default: 'png')
+        result: 'base64'
+    })
+    .then((base64) => {
+      isLocationOnWater(base64).then((res) => {
+        console.log("IS ON WATER:: " + res)
+      })
+    })
+    .catch((err) => {
+        throw new Error(err)
+    })
+  }
+
   return (
     <View style={styles.container}>
       <MapView
-        style={styles.map}
-        region={{
-          latitude: 40.204046791327,
-          longitude: -88.38675184236,
-          latitudeDelta: 0.001,
-          longitudeDelta: 0.001,
-        }}
-        customMapStyle={generatedMapStyle}
-        onPress={onPressHandler}
-      >
-        {isTracking && <AnimatedPolyline />}
-      </MapView>
-      <TouchableOpacity
+      style={styles.map}
+      region={{
+        latitude: coordinate.latitude ?? 40.204046791327,
+        longitude: coordinate.longitude ?? -88.38675184236,
+        latitudeDelta: 0.001,
+        longitudeDelta: 0.001,
+      }}
+      ref={mapRef}
+      customMapStyle={generatedMapStyle}
+      onPress={onPressHandler}
+    >
+      {isTracking && <AnimatedPolyline setCoordinate={setCoordinate}/>}
+    </MapView>
+            <TouchableOpacity
         style={{
           padding: 15,
           borderRadius: 30,
