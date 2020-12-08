@@ -1,5 +1,3 @@
-const token = '<INSERT API KEY>'
-// let URL = 'https://api.onwater.io/api/v1/results/'
 let URL = 'http://192.168.123.17:3000'
 
 /**
@@ -10,7 +8,6 @@ let URL = 'http://192.168.123.17:3000'
  */
 //async function isLocationOnWater(longitude, latitude) {
 async function isLocationOnWater(base64Image) {
-   //let queryURL = `${URL}${latitude},${longitude}?access_token=${token}`
    let queryURL = `${URL}`
 
     try {

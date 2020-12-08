@@ -1,6 +1,6 @@
 import React from "react";
 import { AppLoading } from "expo";
-import { Text, View, StyleSheet, Image } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { useFonts, Quicksand_500Medium } from "@expo-google-fonts/quicksand";
 
@@ -26,8 +26,6 @@ const DataScreen = () => {
       >
         Logdata
       </Text>
-
-      {/* <Image source={{ uri: 'file:///data/user/0/host.exp.exponent/cache/AirMapSnapshot6319477422359432652.png' }} /> */}
 
       <View style={styles.graphContainer}>
         <AnimatedCircularProgress
