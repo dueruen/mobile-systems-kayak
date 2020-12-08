@@ -1,14 +1,19 @@
 import * as Permissions from 'expo-permissions';
 
+/**
+ * Requests permission to sample user location
+ */
 export const requestAndroidLocationPermission = async() => { 
-    const { status } = await Permissions.getAsync(Permissions.LOCATION);
-    let finalStatus = status;
-    if (status !== 'granted') {
-      console.log('not granted')
-      const { status } = await Permissions.askAsync(Permissions.LOCATION);
-      finalStatus = status;
-    }
+    //Check of permission is already granted
+    const { checkStatus } = await Permissions.getAsync(Permissions.LOCATION);
+    let finalStatus = checkStatus;
+    
     if (finalStatus == 'granted') {
       return;
     }
+    
+    //else request permission
+    const { askStatus } = await Permissions.askAsync(Permissions.LOCATION);
+    finalStatus = askStatus;
+    
 }
