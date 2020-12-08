@@ -76,7 +76,11 @@ const AnimatedPolyline = () => {
   return (
     <>
       {coordinates.length > 0 && (
-        <Marker key={1} coordinate={coordinates[0]} title="Start position" />
+        <Marker
+          key={1}
+          coordinate={coordinates[coordinates.length - 1]}
+          title="Start position"
+        />
       )}
       <Polyline
         coordinates={coordinates}
