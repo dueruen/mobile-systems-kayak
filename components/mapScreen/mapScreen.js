@@ -3,6 +3,11 @@ import { View, StyleSheet } from "react-native";
 import isLocationOnWater from "../../api/onWater.js";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import Navbar from "../navbar/Navbar";
+import PubSub from "pubsub-js";
+import { RunDataStream, DataStream, inspvas } from "../../utils/dataGen/index";
+
+//Token from subscription so we're able to unsubscribe.
+let token;
 
 /**
  * When we start working with user data, this should probably be remade into
@@ -16,62 +21,72 @@ const onPressHandler = async (e) => {
   console.log(onWater);
 };
 
-const MapScreen = () => {
+const AnimatedPolyline = () => {
   const [coordinates, setCoordinates] = useState([]);
-  const [pathToAnimate, setPathToAnimate] = useState([
-    { latitude: 55.408188, longitude: 10.38392 },
-    { latitude: 55.408188, longitude: 10.38492 },
-    { latitude: 55.408388, longitude: 10.38592 },
-    { latitude: 55.408488, longitude: 10.38622 },
-    { latitude: 55.408489, longitude: 10.38735 },
-    { latitude: 55.409489, longitude: 10.38935 },
-    { latitude: 55.409429, longitude: 10.38993 },
-    { latitude: 55.409423, longitude: 10.39113 },
-    { latitude: 55.409223, longitude: 10.39113 },
-    { latitude: 55.408023, longitude: 10.39113 },
-    { latitude: 55.407013, longitude: 10.39013 },
-    { latitude: 55.407013, longitude: 10.38513 },
-    { latitude: 55.406813, longitude: 10.38313 },
-  ]);
+  const [pathToAnimate, setPathToAnimate] = useState([]);
 
   /**
    * useEffect() is ran when componentDidMount and the callback invoke clearInterval()
    */
   useEffect(() => {
-    const interval = setInterval(animatePath, 1000);
-    return () => clearInterval(interval);
+    //Start streaming when componentIsMounted
+    streamData();
+    //NOT USED ATM - const interval = setInterval(animatePath, 1000);
+    return () => {
+      //NOT USED ATM - clearInterval(interval);
+      PubSub.unsubscribe(token);
+    };
   }, []);
 
-  /**
-   * Animate path using shift() to remove element and add to coordinate state
-   */
-  const animatePath = () => {
-    if (pathToAnimate.length > 0) {
-      setCoordinates((oldArray) => [...oldArray, pathToAnimate.shift()]);
-    }
+  const streamData = () => {
+    //Start the dataStream
+    PubSub.publish(RunDataStream, true);
+
+    //Subscribe to the data stream
+    token = PubSub.subscribe(DataStream, (msg, data) => {
+      if (data.message === inspvas) {
+        let coordinate = {
+          latitude: parseFloat(data.latitude),
+          longitude: parseFloat(data.longitude),
+        };
+
+        setCoordinates((oldArray) => [...oldArray, coordinate]);
+      }
+    });
   };
 
+  /** NOT USED ATM
+   * Animate path using shift() to remove element and add to coordinate state
+   */
+  //const animatePath = (coordinate) => {
+  //  if (pathToAnimate.length > 0) {
+  //    setCoordinates((oldArray) => [...oldArray, coordinate]);
+  //  }
+  //};
+
+  return (
+    <Polyline coordinates={coordinates} strokeColor="#5f6af8" strokeWidth={4} />
+  );
+};
+
+const MapScreen = () => {
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
         region={{
-          latitude: 55.408188,
-          longitude: 10.383925,
-          latitudeDelta: 0.015,
-          longitudeDelta: 0.0121,
+          latitude: 40.204046791327,
+          longitude: -88.38675184236,
+          latitudeDelta: 0.001,
+          longitudeDelta: 0.001,
         }}
         customMapStyle={generatedMapStyle}
         onPress={onPressHandler}
       >
-        {coordinates.length > 0 && (
+        {/*coordinates.length > 0 && (
           <Marker key={1} coordinate={coordinates[0]} title="Start position" />
-        )}
-        <Polyline
-          coordinates={coordinates}
-          strokeColor="#5f6af8"
-          strokeWidth={4}
-        />
+        )*/}
+        <AnimatedPolyline />
       </MapView>
       <Navbar />
     </View>
