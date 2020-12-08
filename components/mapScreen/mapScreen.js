@@ -1,13 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import isLocationOnWater from "../../api/onWater.js";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import Navbar from "../navbar/Navbar";
 import PubSub from "pubsub-js";
 import { RunDataStream, DataStream, inspvas } from "../../utils/dataGen/index";
-
+import { useFonts, Quicksand_500Medium } from "@expo-google-fonts/quicksand";
+import { AppLoading } from "expo";
+import { set } from "react-native-reanimated";
 //Token from subscription so we're able to unsubscribe.
 let token;
+const window = Dimensions.get("window");
 
 /**
  * When we start working with user data, this should probably be remade into
@@ -70,6 +79,20 @@ const AnimatedPolyline = () => {
 };
 
 const MapScreen = () => {
+  const [isTracking, setIsTracking] = useState(false);
+  let [fontsLoaded] = useFonts({
+    Quicksand_500Medium,
+  });
+
+  if (!fontsLoaded) {
+    return <AppLoading />;
+  }
+  const height = window.height;
+
+  function toggle() {
+    setIsTracking(!isTracking);
+  }
+
   return (
     <View style={styles.container}>
       <MapView
@@ -86,8 +109,28 @@ const MapScreen = () => {
         {/*coordinates.length > 0 && (
           <Marker key={1} coordinate={coordinates[0]} title="Start position" />
         )*/}
-        <AnimatedPolyline />
+        {isTracking && <AnimatedPolyline />}
       </MapView>
+      <TouchableOpacity
+        style={{
+          padding: 15,
+          borderRadius: 30,
+          position: "absolute",
+          backgroundColor: isTracking
+            ? "rgba(60, 179, 113, 0.8)"
+            : "rgba(95, 106, 248, 0.8)",
+          top: height / 8,
+          left: "30%",
+          justifyContent: "center",
+          alignItems: "center",
+          width: window.height / 4 - 5,
+        }}
+        onPress={toggle}
+      >
+        <Text style={{ fontFamily: "Quicksand_500Medium", color: "white" }}>
+          {isTracking ? "TRACKING" : "START TRACKING"}
+        </Text>
+      </TouchableOpacity>
       <Navbar />
     </View>
   );
