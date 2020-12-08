@@ -74,7 +74,16 @@ const AnimatedPolyline = () => {
   //};
 
   return (
-    <Polyline coordinates={coordinates} strokeColor="#5f6af8" strokeWidth={4} />
+    <>
+      {coordinates.length > 0 && (
+        <Marker key={1} coordinate={coordinates[0]} title="Start position" />
+      )}
+      <Polyline
+        coordinates={coordinates}
+        strokeColor="#5f6af8"
+        strokeWidth={4}
+      />
+    </>
   );
 };
 
@@ -106,9 +115,6 @@ const MapScreen = () => {
         customMapStyle={generatedMapStyle}
         onPress={onPressHandler}
       >
-        {/*coordinates.length > 0 && (
-          <Marker key={1} coordinate={coordinates[0]} title="Start position" />
-        )*/}
         {isTracking && <AnimatedPolyline />}
       </MapView>
       <TouchableOpacity
