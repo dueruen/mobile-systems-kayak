@@ -14,6 +14,7 @@ import { RunDataStream, DataStream, inspvas } from "../../utils/dataGen/index";
 import { useFonts, Quicksand_500Medium } from "@expo-google-fonts/quicksand";
 import { AppLoading } from "expo";
 import { set } from "react-native-reanimated";
+import {StartLocationDataSampling, LocationData} from '../../utils/sensorSampler/index'
 //Token from subscription so we're able to unsubscribe.
 let token;
 let locationToken;
@@ -52,7 +53,7 @@ const AnimatedPolyline = () => {
   const streamData = () => {
     //Start the dataStream
     PubSub.publish(RunDataStream, true);
-    PubSub.publish(StarLocationDataSampling, true);
+    PubSub.publish(StartLocationDataSampling, true);
 
     //Subscribe to the data stream
     token = PubSub.subscribe(DataStream, (msg, data) => {

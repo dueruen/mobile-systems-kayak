@@ -2,12 +2,12 @@ import PubSub from "pubsub-js";
 import * as Location from 'expo-location';
 
 // Subscribtion types
-export const StarLocationDataSampling = "StartLocationDataSampling";
+export const StartLocationDataSampling = "StartLocationDataSampling";
 export const LocationData = "LocationData";
 
 let dataStreamRunning = false;
 
-PubSub.subscribe(StarLocationDataSampling, (msg, data) => {
+PubSub.subscribe(StartLocationDataSampling, (msg, data) => {
   if (!data) {
     dataStreamRunning = false;
   } else {
