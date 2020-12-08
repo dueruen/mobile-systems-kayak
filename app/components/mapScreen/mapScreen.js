@@ -22,7 +22,41 @@ let token;
 //Used to place tracking notice
 const window = Dimensions.get("window");
 
-const AnimatedPolyline = (coordinates) => {
+const AnimatedPolyline = (props) => {
+  
+  const [coordinates, setCoordinates] = useState([]);
+  /**
+   * useEffect() is ran when componentDidMount and the callback invoke clearInterval()
+   */
+  useEffect(() => {
+    //Start streaming when componentIsMounted
+    streamData();
+    //NOT USED ATM - const interval = setInterval(animatePath, 1000);
+    return () => {
+      //NOT USED ATM - clearInterval(interval);
+      PubSub.unsubscribe(token);
+//      PubSub.unsubscribe(locationToken);
+    };
+  }, []);
+
+  const streamData = () => {
+    //Start the dataStream
+    PubSub.publish(RunDataStream, true);
+//    PubSub.publish(StartLocationDataSampling, true);
+
+    //Subscribe to the data stream
+    token = PubSub.subscribe(DataStream, (msg, data) => {
+      if (data.message === inspvas) {
+        let coordinate = {
+          latitude: parseFloat(data.latitude),
+          longitude: parseFloat(data.longitude),
+        };
+        props.setCoordinate(coordinate);
+        setCoordinates((oldArray) => [...oldArray, coordinate]);
+      }
+    });
+  }
+
   return (
     <>
       {coordinates.length > 0 && (
@@ -52,10 +86,11 @@ const AnimatedPolyline = (coordinates) => {
 };
 
 const MapScreen = () => {
-  const [coordinates, setCoordinates] = useState([]);
-  const mapRef = React.useRef(null);
-
+  const [coordinate, setCoordinate] = useState({});
   const [isTracking, setIsTracking] = useState(false);
+
+  const mapRef = React.useRef(null);
+  
   let [fontsLoaded] = useFonts({
     Quicksand_500Medium,
   });
@@ -68,36 +103,6 @@ const MapScreen = () => {
   function toggle() {
     setIsTracking(!isTracking);
   }
-
-  /**
-   * useEffect() is ran when componentDidMount and the callback invoke clearInterval()
-  */
-  useEffect(() => {
-    //Start streaming when componentIsMounted
-    streamData();
-    //NOT USED ATM - const interval = setInterval(animatePath, 1000);
-    return () => {
-      //NOT USED ATM - clearInterval(interval);
-      PubSub.unsubscribe(token);
-    };
-  }, []);
-
-  const streamData = () => {
-    //Start the dataStream
-    PubSub.publish(RunDataStream, true);
-
-    //Subscribe to the data stream
-    token = PubSub.subscribe(DataStream, (msg, data) => {
-      if (data.message === inspvas) {
-        let coordinate = {
-          latitude: parseFloat(data.latitude),
-          longitude: parseFloat(data.longitude),
-        };
-
-        setCoordinates((oldArray) => [...oldArray, coordinate]);
-      }
-    });
-  };
 
   /**
    * When we start working with user data, this should probably be remade into
@@ -129,8 +134,8 @@ const MapScreen = () => {
       <MapView
       style={styles.map}
       region={{
-        latitude: coordinates[coordinates.length - 1].latitude,
-        longitude: coordinates[coordinates.length - 1].longitude,
+        latitude: coordinate.latitude ?? 40.204046791327,
+        longitude: coordinate.longitude ?? -88.38675184236,
         latitudeDelta: 0.001,
         longitudeDelta: 0.001,
       }}
@@ -138,7 +143,7 @@ const MapScreen = () => {
       customMapStyle={generatedMapStyle}
       onPress={onPressHandler}
     >
-      {isTracking && <AnimatedPolyline coordinates={coordinates}/>}
+      {isTracking && <AnimatedPolyline setCoordinate={setCoordinate}/>}
     </MapView>
             <TouchableOpacity
         style={{

@@ -33,8 +33,8 @@ app.post('/', (req, res) => {
   image.decode((pixels) => {
     let waterCount = 0;
     let notWaterCount = 0;
-    for(let row = 39; row < 42; row++) {
-      for(let col = 39; col < 42; col++) {
+    for(let row = 35; row < 46; row++) {
+      for(let col = 35; col < 46; col++) {
         const rowOffset = row * 81 * 4;
         const colOffset = col * 4;
         const offset = rowOffset + colOffset;
@@ -44,6 +44,7 @@ app.post('/', (req, res) => {
           b: pixels[offset + 2],
           a: pixels[offset + 3]
         }
+        console.log(pixelColor)
         if (pixelColor.r !== waterColor.r || pixelColor.g !== waterColor.g || pixelColor.b !== waterColor.b || pixelColor.a !== waterColor.a) {
           if (pixelColor.r !== lineColor.r || pixelColor.g !== lineColor.g || pixelColor.b !== lineColor.b || pixelColor.a !== lineColor.a) {
             notWaterCount++;
