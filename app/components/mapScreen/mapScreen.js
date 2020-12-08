@@ -1,36 +1,73 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import isLocationOnWater from "../../api/onWater.js";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import Navbar from "../navbar/Navbar";
 import PubSub from "pubsub-js";
 import { RunDataStream, DataStream, inspvas } from "../../utils/dataGen/index";
+import { useFonts, Quicksand_500Medium } from "@expo-google-fonts/quicksand";
+import { AppLoading } from "expo";
+//import {StartLocationDataSampling, LocationData} from '../../utils/sensorSampler/index'
+import * as Animatable from "react-native-animatable";
 
 //Token from subscription so we're able to unsubscribe.
 let token;
+//let locationToken;
+//Used to place tracking notice
+const window = Dimensions.get("window");
 
 const AnimatedPolyline = (coordinates) => {
-  
-  const [pathToAnimate, setPathToAnimate] = useState([]);
-
-  /** NOT USED ATM
-   * Animate path using shift() to remove element and add to coordinate state
-   */
-  //const animatePath = (coordinate) => {
-  //  if (pathToAnimate.length > 0) {
-  //    setCoordinates((oldArray) => [...oldArray, coordinate]);
-  //  }
-  //};
-
   return (
-    <Polyline coordinates={coordinates} strokeColor="#5f6af8" strokeWidth={4} />
+    <>
+      {coordinates.length > 0 && (
+        <Marker
+          key={1}
+          coordinate={coordinates[coordinates.length - 1]}
+          title="Start position"
+          anchor={{ x: 0.3, y: 0.31 }}
+          opacity={0.8}
+        >
+          <Animatable.Image
+            animation="pulse"
+            easing="ease-out"
+            iterationCount="infinite"
+            source={require("../../assets/img/circle.png")}
+            style={{ height: 18, width: 18 }}
+          ></Animatable.Image>
+        </Marker>
+      )}
+      <Polyline
+        coordinates={coordinates}
+        strokeColor="#5f6af8"
+        strokeWidth={4}
+      />
+    </>
   );
 };
 
 const MapScreen = () => {
   const [coordinates, setCoordinates] = useState([]);
-  const [mapSnapshot, setMapSnapshot] = useState();
   const mapRef = React.useRef(null);
+
+  const [isTracking, setIsTracking] = useState(false);
+  let [fontsLoaded] = useFonts({
+    Quicksand_500Medium,
+  });
+
+  if (!fontsLoaded) {
+    return <AppLoading />;
+  }
+  const height = window.height;
+
+  function toggle() {
+    setIsTracking(!isTracking);
+  }
 
   /**
    * useEffect() is ran when componentDidMount and the callback invoke clearInterval()
@@ -65,102 +102,33 @@ const MapScreen = () => {
   /**
    * When we start working with user data, this should probably be remade into
    * a onUserLocationChangedHandler instead
-   */
+  */
   const onPressHandler = async (e) => {
-    // let onWater = await isLocationOnWater(
-    //   e.nativeEvent.coordinate.longitude,
-    //   e.nativeEvent.coordinate.latitude
-    // );
-    //console.log(onWater);
-    console.log("PRESS");
-    takeSnapshot()
     takeSnapshotWater()
   };
 
-  function takeSnapshot() {
+  function takeSnapshotWater() {
     mapRef.current.takeSnapshot({
         width: 31, // optional, when omitted the view-width is used
         height: 31, // optional, when omitted the view-height is used
         format: 'png', // image formats: 'png', 'jpg' (default: 'png')
-        //quality: 0.8, // image quality: 0..1 (only relevant for jpg, default: 1)
-        result: 'file' // result types: 'file', 'base64' (default: 'file')
-        //result: 'base64'
+        result: 'base64'
     })
-    .then((uri) => {
-// Set the uri on the mapImage state
-console.log("URI::")
-console.log(uri)
-setMapSnapshot(uri);
+    .then((base64) => {
+      isLocationOnWater(base64).then((res) => {
+        console.log("IS ON WATER:: " + res)
+      })
     })
     .catch((err) => {
         throw new Error(err)
     })
-}
-
-function takeSnapshotWater() {
-  mapRef.current.takeSnapshot({
-      width: 31, // optional, when omitted the view-width is used
-      height: 31, // optional, when omitted the view-height is used
-      format: 'png', // image formats: 'png', 'jpg' (default: 'png')
-      //quality: 0.8, // image quality: 0..1 (only relevant for jpg, default: 1)
-      //result: 'file' // result types: 'file', 'base64' (default: 'file')
-      result: 'base64'
-  })
-  .then((base64) => {
-    console.log("IMAGE")
-    console.log(base64)
-    isLocationOnWater(base64).then((res) => {
-      console.log("IS ON WATER:: " + res)
-    })
-    // pixels(base64).then((data, width, height) => {
-    //   console.log("HERE!!!")
-    //   console.log(data)
-    //   console.log(width + "  " + height)
-    // })
-
-    // Set the uri on the mapImage state
-//var image = new Image();
-//image.src = "data:image/png;base64," + base64;
-// var canvas = new Canvas();
-// canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
-
-// var pixelData = canvas.getContext('2d').getImageData(0, 0, image.width, image.height).data;
-// console.log("PIXEL")
-// console.log(pixelData)
-  })
-  .catch((err) => {
-      throw new Error(err)
-  })
-}
+  }
 
   return (
     <View style={styles.container}>
-            {/* <View
-        style={{
-          height: '55%'
-        }}>
-        <Image
-          // Using react native elements we render a placeholder 
-          PlaceholderContent={< ActivityIndicator />}
-          source={{
-          // Once the mapImage uri is set <Image> replaces the placeholder with it
-          uri: mapSnapshot
-          }}
-          style={{
-          width: '100%',
-          height: '100%'
-          }}
-          containerStyle={{
-          overflow: "hidden"
-          }}
-        />
-      </View> */}
-      { coordinates.length != 0 &&
       <MapView
       style={styles.map}
       region={{
-        //latitude: 40.204046791327,
-        //longitude: -88.38675184236,
         latitude: coordinates[coordinates.length - 1].latitude,
         longitude: coordinates[coordinates.length - 1].longitude,
         latitudeDelta: 0.001,
@@ -170,18 +138,29 @@ function takeSnapshotWater() {
       customMapStyle={generatedMapStyle}
       onPress={onPressHandler}
     >
-      {/*coordinates.length > 0 && (
-        <Marker key={1} coordinate={coordinates[0]} title="Start position" />
-      )*/}
-      {/* <AnimatedPolyline coordinates={coordinates}/> */}
-      <Polyline coordinates={coordinates} strokeColor="#5f6af8" strokeWidth={4} />
+      {isTracking && <AnimatedPolyline coordinates={coordinates}/>}
     </MapView>
-      }
+            <TouchableOpacity
+        style={{
+          padding: 15,
+          borderRadius: 30,
+          position: "absolute",
+          backgroundColor: isTracking
+            ? "rgba(60, 179, 113, 0.8)"
+            : "rgba(95, 106, 248, 0.8)",
+          top: height / 8,
+          left: "30%",
+          justifyContent: "center",
+          alignItems: "center",
+          width: window.height / 4 - 5,
+        }}
+        onPress={toggle}
+      >
+        <Text style={{ fontFamily: "Quicksand_500Medium", color: "white" }}>
+          {isTracking ? "TRACKING" : "START TRACKING"}
+        </Text>
+      </TouchableOpacity>
       <Navbar />
-      
-      {/* <TouchableOpacity onPress={takeSnapshot}>
-        Take Snapshot
-      </TouchableOpacity> */}
     </View>
   );
 };

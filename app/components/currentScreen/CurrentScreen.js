@@ -2,15 +2,16 @@ import { AppLoading } from "expo";
 import React from "react";
 import { ImageBackground, StyleSheet, Text, View } from "react-native";
 import Navbar from "../navbar/Navbar";
-import { useFonts, Quicksand_500Medium } from "@expo-google-fonts/quicksand";
-
-const backgroundImage = {
-  uri: require("../../assets/img/kayak.jpg"),
-};
+import {
+  useFonts,
+  Quicksand_500Medium,
+  Quicksand_700Bold,
+} from "@expo-google-fonts/quicksand";
 
 const CurrentScreen = () => {
   let [fontsLoaded] = useFonts({
     Quicksand_500Medium,
+    Quicksand_700Bold,
   });
 
   if (!fontsLoaded) {
@@ -19,11 +20,14 @@ const CurrentScreen = () => {
 
   return (
     <View style={styles.container}>
-      <ImageBackground source={{ backgroundImage }} style={styles.image}>
+      <ImageBackground
+        source={require("../../assets/img/kayak.jpg")}
+        style={styles.image}
+      >
         <Text
           style={{
-            fontFamily: "Quicksand_500Medium",
-            color: "black",
+            fontFamily: "Quicksand_700Bold",
+            color: "#FFF",
             fontSize: 20,
           }}
         >
@@ -32,14 +36,14 @@ const CurrentScreen = () => {
         <Text
           style={{
             fontFamily: "Quicksand_500Medium",
-            color: "#888",
+            color: "#F5F5F5",
             fontSize: 14,
           }}
         >
           In water
         </Text>
       </ImageBackground>
-      <Navbar />
+      <Navbar view="current" />
     </View>
   );
 };

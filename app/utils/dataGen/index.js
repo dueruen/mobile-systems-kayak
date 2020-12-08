@@ -50,7 +50,7 @@ const runDataGen = () => {
   publishData(dataObjects[count]);
   setTimeout(() => {
     count++;
-    if (count !== dataObjects.length) {
+    if (count !== dataObjects.length && dataStreamRunning) {
       runDataGen();
     }
   }, dataPublishInterval);

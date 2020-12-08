@@ -97,7 +97,7 @@ const DataScreen = () => {
           )}
         </AnimatedCircularProgress>
       </View>
-      <Navbar />
+      <Navbar view="data" />
     </View>
   );
 };
