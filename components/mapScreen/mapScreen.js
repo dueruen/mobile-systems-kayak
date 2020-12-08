@@ -15,9 +15,12 @@ import { useFonts, Quicksand_500Medium } from "@expo-google-fonts/quicksand";
 import { AppLoading } from "expo";
 import { set } from "react-native-reanimated";
 import {StartLocationDataSampling, LocationData} from '../../utils/sensorSampler/index'
+import * as Animatable from "react-native-animatable";
+
 //Token from subscription so we're able to unsubscribe.
 let token;
 let locationToken;
+//Used to place tracking notice
 const window = Dimensions.get("window");
 
 /**
@@ -72,15 +75,6 @@ const AnimatedPolyline = () => {
     });
   };
 
-  /** NOT USED ATM
-   * Animate path using shift() to remove element and add to coordinate state
-   */
-  //const animatePath = (coordinate) => {
-  //  if (pathToAnimate.length > 0) {
-  //    setCoordinates((oldArray) => [...oldArray, coordinate]);
-  //  }
-  //};
-
   return (
     <>
       {coordinates.length > 0 && (
@@ -88,7 +82,17 @@ const AnimatedPolyline = () => {
           key={1}
           coordinate={coordinates[coordinates.length - 1]}
           title="Start position"
-        />
+          anchor={{ x: 0.3, y: 0.31 }}
+          opacity={0.8}
+        >
+          <Animatable.Image
+            animation="pulse"
+            easing="ease-out"
+            iterationCount="infinite"
+            source={require("../../assets/img/circle.png")}
+            style={{ height: 18, width: 18 }}
+          ></Animatable.Image>
+        </Marker>
       )}
       <Polyline
         coordinates={coordinates}
