@@ -39,7 +39,7 @@ const CurrentScreen = () => {
           In water
         </Text>
       </ImageBackground>
-      <Navbar />
+      <Navbar view="current" />
     </View>
   );
 };
