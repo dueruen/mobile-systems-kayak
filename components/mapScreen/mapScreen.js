@@ -14,12 +14,12 @@ import { RunDataStream, DataStream, inspvas } from "../../utils/dataGen/index";
 import { useFonts, Quicksand_500Medium } from "@expo-google-fonts/quicksand";
 import { AppLoading } from "expo";
 import { set } from "react-native-reanimated";
-import {StartLocationDataSampling, LocationData} from '../../utils/sensorSampler/index'
+//import {StartLocationDataSampling, LocationData} from '../../utils/sensorSampler/index'
 import * as Animatable from "react-native-animatable";
 
 //Token from subscription so we're able to unsubscribe.
 let token;
-let locationToken;
+//let locationToken;
 //Used to place tracking notice
 const window = Dimensions.get("window");
 
@@ -49,14 +49,14 @@ const AnimatedPolyline = () => {
     return () => {
       //NOT USED ATM - clearInterval(interval);
       PubSub.unsubscribe(token);
-      PubSub.unsubscribe(locationToken);
+//      PubSub.unsubscribe(locationToken);
     };
   }, []);
 
   const streamData = () => {
     //Start the dataStream
     PubSub.publish(RunDataStream, true);
-    PubSub.publish(StartLocationDataSampling, true);
+//    PubSub.publish(StartLocationDataSampling, true);
 
     //Subscribe to the data stream
     token = PubSub.subscribe(DataStream, (msg, data) => {
@@ -70,9 +70,9 @@ const AnimatedPolyline = () => {
       }
     });
 
-    locationToken = PubSub.subscribe(LocationData, (msg, data) => {
-      console.log(data)
-    });
+//    locationToken = PubSub.subscribe(LocationData, (msg, data) => {
+//      console.log(data)
+//    });
   };
 
   return (
