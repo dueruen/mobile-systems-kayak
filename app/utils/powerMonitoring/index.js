@@ -29,10 +29,11 @@ export const startBatteryListener = () => {
     })
 
     Battery.addBatteryLevelListener((res) => {
+        console.log(res)
         if(res.batteryLevel >= 0.20) { 
             batteryHasChargedBackToNormal();
         }
-        if(res.batteryLevel <= 0.15) { 
+        if(res.batteryLevel <= 0.16) { //set threshold to 0.16 due to Android throwing event at  0.150000006
             batteryAlmostDepleted();
         }
     })
@@ -45,25 +46,21 @@ export const startBatteryListener = () => {
 }
 
 const lowPowerModeEnabled = () => {
-    console.log("lowPowerModeEnabled")
     PubSub.publish(PowerUpdates, LowPowerModeEnabled)
 
 }
 
 const lowPowerModeDisabled = () => {
-    console.log("lowPowerModeDisabled")
     PubSub.publish(PowerUpdates, LowPowerModeDisabled)
 
 }
 
 const batteryAlmostDepleted = () => {
-    console.log("batteryAlmostDepleted")
     PubSub.publish(PowerUpdates, BatteryAlmostDepleted)
 
 }
 
 const batteryHasChargedBackToNormal = () => { 
-    console.log("batteryHasChargedBackToNormal")
     PubSub.publish(PowerUpdates, BatteryHasChargedBackToNormal)
 
 }
