@@ -13,6 +13,7 @@
     "@react-navigation/native": "^5.8.6",
     "@react-navigation/stack": "^5.12.3",
     "expo": "~39.0.2",
+    "expo-battery": "~3.0.0",
     "expo-font": "~8.3.0",
     "expo-location": "~9.0.0",
     "expo-permissions": "~9.3.0",

@@ -8,8 +8,8 @@ import DataScreen from "./components/dataScreen/DataScreen";
 import CurrentScreen from "./components/currentScreen/CurrentScreen";
 import MapScreen from "./components/mapScreen/mapScreen";
 import { AppLoading } from "expo";
-
 import {requestAndroidLocationPermission} from './utils/permissionHandler/index'
+import {startBatteryListener} from './utils/powerMonitoring/index'
 
 const Stack = createStackNavigator();
 
@@ -20,6 +20,7 @@ export default function App() {
   });
 
   requestAndroidLocationPermission();
+  startBatteryListener();
 
   if (!fontsLoaded) {
     return <AppLoading />;

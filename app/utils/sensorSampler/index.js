@@ -1,5 +1,6 @@
 import PubSub from "pubsub-js";
 import * as Location from 'expo-location';
+import {PowerUpdates} from '../powerMonitoring/index'
 
 // Subscribtion types
 export const StartLocationDataSampling = "StartLocationDataSampling";
@@ -17,6 +18,12 @@ PubSub.subscribe(StartLocationDataSampling, (msg, data) => {
       startLocationSampling();
     }
   }
+});
+
+PubSub.subscribe(PowerUpdates, (msg, data) => {
+  console.log("Received power update:")
+  console.log(msg)
+  console.log(data)
 });
 
 const startLocationSampling = () => {
