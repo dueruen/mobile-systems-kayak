@@ -41,7 +41,6 @@ const CurrentScreen = () => {
         );
 
         setCurrentSpeed(speed);
-        //console.log(currentSpeed);
       }
     });
   };

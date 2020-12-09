@@ -1,10 +1,9 @@
-let URL = "http://192.168.87.51:3000";
+let URL = "http://192.168.0.103:3000";
 
 /**
  * Queries the OnWater API, and returns true or false, based on whether the
- * specified lon/lat pair is on water or not
- * @param {String} longitude
- * @param {String} latitude
+ * specified base64Image is on water or not
+ * @param {String} base64Image
  */
 //async function isLocationOnWater(longitude, latitude) {
 async function isLocationOnWater(base64Image) {

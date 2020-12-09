@@ -214,9 +214,7 @@ const MapScreen = () => {
             <Text style={{ fontFamily: "Quicksand_700Bold" }}>
               Current position
             </Text>
-            <Text style={{ fontSize: 15 }}>
-              {inWater ? "In water" : "Not in water"}
-            </Text>
+            <Text>{inWater ? "In water" : "Not in water"}</Text>
           </View>
         </View>
       </View>
