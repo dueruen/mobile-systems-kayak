@@ -1,6 +1,6 @@
 import PubSub from "pubsub-js";
 import * as Location from 'expo-location';
-import {PowerUpdates, BatteryAlmostDepleted, BatteryHasChargedBackToNormal} from '../powerMonitoring/index'
+import {PowerUpdates, BatteryAlmostDepleted, BatteryHasChargedBackToNormal, LowPowerModeEnabled, LowPowerModeDisabled} from '../powerMonitoring/index'
 
 // Subscribtion types
 export const StartLocationDataSampling = "StartLocationDataSampling";
@@ -21,13 +21,16 @@ PubSub.subscribe(StartLocationDataSampling, (msg, data) => {
 });
 
 PubSub.subscribe(PowerUpdates, (msg, data) => {
-  console.log("Received power update:")
   if(data == BatteryAlmostDepleted) { 
-    console.log("Depletion")
     dataPublishInterval = 1000;
   }
   if(data == BatteryHasChargedBackToNormal) { 
-    console.log("Charging back to normal")
+    dataPublishInterval = 200;
+  }
+  if(data == LowPowerModeEnabled) { 
+    dataPublishInterval = 1000;
+  }
+  if(data == LowPowerModeDisabled) {
     dataPublishInterval = 200;
   }
 });

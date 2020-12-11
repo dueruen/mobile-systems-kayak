@@ -1,12 +1,6 @@
 import * as Battery from 'expo-battery';
 import PubSub from "pubsub-js";
 
-/*
-Thresholds for triggering Android battery events:
-Falling below 15%
-Rising above 20%
-*/
-
 //Topics
 export const PowerUpdates = 'PowerUpdates'
 
@@ -16,16 +10,26 @@ export const BatteryHasChargedBackToNormal = 'BatteryHasChargedBackToNormal'
 export const LowPowerModeEnabled = 'LowPowerModeEnabled'
 export const LowPowerModeDisabled = ' LowPowerModeDisabled'
 
-export const startBatteryListener = () => {
-    Battery.addLowPowerModeListener((res) => { 
-        if(res.lowPowerMode == true) {
+export const startBatteryListener = async() => {
+
+    //In case low power mode is enabled upon starting the app
+    await Battery.isLowPowerModeEnabledAsync()
+    .then(res => {
+        if(res.lowPowerMode) { 
             lowPowerModeEnabled()
         }
+    })
 
-        if(res.lowPowerMode == false) {
-            lowPowerModeDisabled()
+    //In case app is started when battery is low
+    await Battery.getBatteryLevelAsync()
+    .then(res => {
+        if(res.batteryLevel <= 0.16) { //set threshold to 0.16 due to Android throwing event at  0.150000006
+            batteryAlmostDepleted();
         }
+    })
 
+    Battery.addLowPowerModeListener((res) => { 
+        res.lowPowerMode ? lowPowerModeEnabled() : lowPowerModeDisabled()
     })
 
     Battery.addBatteryLevelListener((res) => {
@@ -45,21 +49,33 @@ export const startBatteryListener = () => {
     //})
 }
 
+/**
+ * Low power mode has been enabled on the phone
+ */
 const lowPowerModeEnabled = () => {
     PubSub.publish(PowerUpdates, LowPowerModeEnabled)
 
 }
 
+/**
+ * Low power mode has been disabled on the phone
+ */
 const lowPowerModeDisabled = () => {
     PubSub.publish(PowerUpdates, LowPowerModeDisabled)
 
 }
 
+/**
+ * Battery has depleted to the point of 15% power
+ */
 const batteryAlmostDepleted = () => {
     PubSub.publish(PowerUpdates, BatteryAlmostDepleted)
 
 }
 
+/**
+ * Battery has regained power above 20%
+ */
 const batteryHasChargedBackToNormal = () => { 
     PubSub.publish(PowerUpdates, BatteryHasChargedBackToNormal)
 
