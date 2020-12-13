@@ -6,7 +6,7 @@ import {PowerUpdates, BatteryAlmostDepleted, BatteryHasChargedBackToNormal, LowP
 export const StartLocationDataSampling = "StartLocationDataSampling";
 export const LocationData = "LocationData";
 
-let dataPublishInterval = 200;
+let samplingInterval = 200;
 let dataStreamRunning = false;
 
 PubSub.subscribe(StartLocationDataSampling, (msg, data) => {
@@ -22,16 +22,16 @@ PubSub.subscribe(StartLocationDataSampling, (msg, data) => {
 
 PubSub.subscribe(PowerUpdates, (msg, data) => {
   if(data == BatteryAlmostDepleted) { 
-    dataPublishInterval = 1000;
+    samplingInterval = 1000;
   }
   if(data == BatteryHasChargedBackToNormal) { 
-    dataPublishInterval = 200;
+    samplingInterval = 200;
   }
   if(data == LowPowerModeEnabled) { 
-    dataPublishInterval = 1000;
+    samplingInterval = 1000;
   }
   if(data == LowPowerModeDisabled) {
-    dataPublishInterval = 200;
+    samplingInterval = 200;
   }
 });
 
@@ -41,7 +41,7 @@ const startLocationSampling = () => {
     if (dataStreamRunning) {
       startLocationSampling();
     }
-  }, dataPublishInterval);
+  }, samplingInterval);
 };
 
 const sampleLocation = async () => {
