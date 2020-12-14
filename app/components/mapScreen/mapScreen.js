@@ -20,6 +20,7 @@ import { AppLoading } from "expo";
 //import {StartLocationDataSampling, LocationData} from '../../utils/sensorSampler/index'
 import * as Animatable from "react-native-animatable";
 import { calculateSpeedFromVelocityData } from "../../utils/speedCalc/index";
+import { PowerUpdates, BatteryAlmostDepleted, BatteryHasChargedBackToNormal, LowPowerModeEnabled, LowPowerModeDisabled } from "../../utils/powerMonitoring";
 
 //Token from subscription so we're able to unsubscribe.
 let token;
@@ -29,10 +30,14 @@ const window = Dimensions.get("window");
 
 const AnimatedPolyline = (props) => {
   const [coordinates, setCoordinates] = useState([]);
+  const [lines, setLines] = useState([{color: "#5f6af8", start: 0, end: -1}]);
+  const [newLine, setNewLine] = useState();
+
   /**
    * useEffect() is ran when componentDidMount and the callback invoke clearInterval()
    */
   useEffect(() => {
+    subPower();
     //Start streaming when componentIsMounted
     streamData();
     //NOT USED ATM - const interval = setInterval(animatePath, 1000);
@@ -42,6 +47,34 @@ const AnimatedPolyline = (props) => {
       //      PubSub.unsubscribe(locationToken);
     };
   }, []);
+
+  useEffect(() => {
+    if (!newLine) {
+      return;
+    }
+
+    const index = (coordinates.length == 0) ? 0 : coordinates.length - 1;
+    l = lines;
+    l[lines.length - 1].end = index;
+    newLine.start = index;
+    l.push(newLine)
+    setLines(l);
+    setNewLine(undefined)
+  }, [newLine])
+
+  const subPower = () => {
+    PubSub.subscribe(PowerUpdates, (msg, data) => {
+      if (data === BatteryAlmostDepleted) {
+        setNewLine({color: "#ff0000", start: -1, end: -1});
+      } else if (data === BatteryHasChargedBackToNormal) {
+        setNewLine({color: "#5f6af8", start: -1, end: -1});
+      } else if (data === LowPowerModeEnabled) {
+        setNewLine({color: "#ffff00", start: -1, end: -1});
+      } else if (data === LowPowerModeDisabled) {
+        setNewLine({color: "#5f6af8", start: -1, end: -1});
+      }
+    });
+  }
 
   const streamData = () => {
     //Start the dataStream
@@ -81,11 +114,14 @@ const AnimatedPolyline = (props) => {
           ></Animatable.Image>
         </Marker>
       )}
-      <Polyline
-        coordinates={coordinates}
-        strokeColor="#5f6af8"
-        strokeWidth={4}
-      />
+      {lines.map((value, i) => 
+            <Polyline
+              coordinates={coordinates.slice(value.start, (value.end === -1) ? coordinates.length - 1 : value.end)}
+              strokeColor= {value.color}
+              strokeWidth={4}
+              key={i}
+          />
+      )}
     </>
   );
 };
