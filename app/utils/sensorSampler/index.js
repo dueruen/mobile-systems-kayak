@@ -1,11 +1,12 @@
 import PubSub from "pubsub-js";
 import * as Location from 'expo-location';
+import {PowerUpdates, BatteryAlmostDepleted, BatteryHasChargedBackToNormal, LowPowerModeEnabled, LowPowerModeDisabled} from '../powerMonitoring/index'
 
 // Subscribtion types
 export const StartLocationDataSampling = "StartLocationDataSampling";
 export const LocationData = "LocationData";
 
-const dataPublishInterval = 200;
+let samplingInterval = 200;
 let dataStreamRunning = false;
 
 PubSub.subscribe(StartLocationDataSampling, (msg, data) => {
@@ -19,13 +20,28 @@ PubSub.subscribe(StartLocationDataSampling, (msg, data) => {
   }
 });
 
+PubSub.subscribe(PowerUpdates, (msg, data) => {
+  if(data == BatteryAlmostDepleted) { 
+    samplingInterval = 1000;
+  }
+  if(data == BatteryHasChargedBackToNormal) { 
+    samplingInterval = 200;
+  }
+  if(data == LowPowerModeEnabled) { 
+    samplingInterval = 1000;
+  }
+  if(data == LowPowerModeDisabled) {
+    samplingInterval = 200;
+  }
+});
+
 const startLocationSampling = () => {
   sampleLocation();
   setTimeout(() => {
     if (dataStreamRunning) {
       startLocationSampling();
     }
-  }, dataPublishInterval);
+  }, samplingInterval);
 };
 
 const sampleLocation = async () => {
