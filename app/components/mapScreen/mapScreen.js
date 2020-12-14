@@ -39,6 +39,7 @@ const AnimatedPolyline = (props) => {
     return () => {
       //NOT USED ATM - clearInterval(interval);
       PubSub.unsubscribe(token);
+      PubSub.publish(RunDataStream, false);
       //      PubSub.unsubscribe(locationToken);
     };
   }, []);
@@ -104,6 +105,7 @@ const MapScreen = () => {
     return () => {
       clearInterval(interval);
       PubSub.unsubscribe(token);
+      PubSub.publish(RunDataStream, false);
     };
   }, []);
 
