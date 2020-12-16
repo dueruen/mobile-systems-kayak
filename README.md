@@ -4,7 +4,7 @@
 
 :iphone: React native app that for logging trajectory data in a kayak
 
-<img src="Images/image1.png" height='auto' width='270'/> <img src="Images/Image2.png" height='auto' width='270'/>
+<img src="Images/image1.png" height='auto' width='270'/> 
 
 # How to setup?
 
