@@ -1,5 +1,6 @@
 # The Kayaklog
 [![platform](https://img.shields.io/badge/platform-Android-brightgreen.svg)](https://www.android.com)
+[![platform](https://img.shields.io/badge/platform-ios-brightgreen.svg)](https://developer.apple.com/develop/)
 
 :iphone: React native app that for logging trajectory data in a kayak
 
@@ -7,7 +8,7 @@
 
 # How to setup?
 
-1. Start the water api using node, in the `/waterCheckAPI` folder use `node index.js` 
+1. Start the water api using `node index.js` in the `/waterCheckAPI` folder
 2. Start an android or Iphone emulator 
 3. Use the following command `expo start` in the `\app` folder.
 
