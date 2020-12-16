@@ -1,4 +1,4 @@
-# The Kayaklog
+# The Kayaklog app
 [![platform](https://img.shields.io/badge/platform-Android-brightgreen.svg)](https://www.android.com)
 [![platform](https://img.shields.io/badge/platform-ios-brightgreen.svg)](https://developer.apple.com/develop/)
 
@@ -10,7 +10,7 @@
 
 1. Start the water api using `node index.js` in the `/waterCheckAPI` folder
 2. Start an android or Iphone emulator 
-3. Use the following command `expo start` in the `\app` folder.
+3. Use the following command `expo start` in the `/app` folder.
 
 ## Interesting libraries used
 
